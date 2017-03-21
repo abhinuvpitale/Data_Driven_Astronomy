@@ -1,0 +1,60 @@
+# Write your find_closest function here
+import numpy as np
+def angular_dist(r1_deg,d1_deg,r2_deg,d2_deg):
+  r1 = np.radians(r1_deg)
+  r2 = np.radians(r2_deg)
+  d1 = np.radians(d1_deg)
+  d2 = np.radians(d2_deg)
+  
+  delta_1 = d1 - d2
+  if delta_1<0:
+    delta_1 = - delta_1
+  delta_1 = (delta_1)/2
+  a = (np.sin(delta_1))*(np.sin(delta_1))
+  b = np.cos(d1)*np.cos(d2)*np.sin(np.abs(r1 - r2)/2)**2
+  d = 2*np.arcsin(np.sqrt(a + b)) 
+  return np.degrees(d)
+
+def hms2dec(h,m,s):
+  return 15*(h+(m/60)+(s/3600))
+
+def dms2dec(d,m,s):
+  if d>0:
+    return (d+(m/60)+(s/3600))
+  else:
+    return -((-d)+(m/60)+(s/3600))
+
+def import_bss():
+  cat = np.loadtxt('bss.dat',usecols=range(1,7))
+  list_ele = []
+  i = 1
+  for item in cat:
+    h1 = hms2dec(item[0],item[1],item[2])
+    r1 = dms2dec(item[3],item[4],item[5])
+    list_ele.append((i,h1,r1))
+    i = i+1
+  return list_ele
+
+def find_closest(cat,r,d):
+  item_select = cat[1]
+  lowest_dist = angular_dist(r,d,item_select[1],item_select[2])
+  
+  for item in cat:
+    item_dist = angular_dist(r,d,item[1],item[2])
+    if item_dist<lowest_dist:
+      lowest_dist = item_dist
+      item_select = item
+  return (item_select[0],lowest_dist)
+
+
+
+# You can use this to test your function.
+# Any code inside this `if` statement will be ignored by the automarker.
+if __name__ == '__main__':
+  cat = import_bss()
+  
+  # First example from the question
+  print(find_closest(cat, 175.3, -32.5))
+
+  # Second example in the question
+  print(find_closest(cat, 32.2, 40.7))
